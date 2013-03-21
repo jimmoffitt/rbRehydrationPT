@@ -735,7 +735,7 @@ if __FILE__ == $0  #This script code is executed when running this file.
     end
 
     if $config.nil? then
-        $config = "./PowerTrackConfig_private.yaml"  #Default
+        $config = "./PowerTrackConfig.yaml"  #Default
     end
 
     #Create a Rehyrdation PowerTrack object, passing in an account configuration file.
