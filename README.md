@@ -79,7 +79,8 @@ they were requested.
 
 
 More Details
-============
+===========
+    #TODO: add handling of requested ID with invalid formats.  
 
     #TODO: add a file-less mechanism for passing in IDs to Rehydration object.
     # oRehy = PtHydration.new(activity_list=nil)
