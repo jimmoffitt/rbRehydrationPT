@@ -10,21 +10,29 @@ can be delimited by any non-numeric character, with commas (*.csv) and tabs (*.t
 
 Requested IDs can also be passed in with the setRequestList(array) method.
 
-Retrieved tweets are written to a user-specified out_box, with a [tweet_id].json filename.
-There is also an option to have the tweets written to a local (MySQL) database.  (See the PtDB class below for
-information on what the expected local schema looks like.)
+By default this script writes processed activities (tweets) as individual JSON files.  The script can also be 
+configured to write activities to a local database.  There is a PtDatabase class included here that encapsulates
+the database details, including an ActiveRecord schema description.  If you are using a database, the PowerTrack
+configuration file must have a "database" section containing connection details.  
 
-Requests for tweets can result in three results:
+Requests for tweets can produce three results:
 + Tweet is available through API.
 + Tweet is older than what can be provided by Rehydration API.  30-days old is the anticipated limit.
 + Tweet could not be found and is not available (na).
 
 Tweets that could not be retrieved can be handled in a flexible fashion.
-+ Tweets IDs are written to an output file.
++ Unavailable Tweets IDs are written to a list which is writtento an output file.
 + Also, for unavailable IDs, a file can be written in a subfolder with the API status written in it.
             
      + @out_box/@out_box_na/[tweet_id].na
      + @out_box/@out_box_out/[tweet_id].old
+
+API responses include 3 key elements:
+  1. The tweet ID and associated content (if available)
+  2. Availability (a true/false	Boolean)
+  3. Status (only present for unavailable tweets)
+
+
 
 Usage
 =====
@@ -45,6 +53,29 @@ So, if you were running from a directory with this source file in it, with the c
 the command-line would look like this:
 
         $ruby ./pt_rehydration.rb -c "./PowerTrackConfig.yaml"
+
+
+Basics, Best Practices & Limitations
+====================================
+
++ Authentication: Your Gnip account credentials and authentication method are the same for Rehydration as for other Gnip products.
++ Data Availability Time Window: The Rehydration API makes data available for a 
+rolling window of the past 7 days (soon to be 30 days). All tweet IDs prior to 7 (30)
+days ago will return a "status”:"outside available timeframe" message.
++ Request Limits: The Rehydration API has a default max limit of 100 tweet IDs per 
+request, with an anticipated response time for all IDs of well under 1 second.  If an 
+even lower level of response latency is desired, consider issuing requests with fewer 
+than 50 IDs.
++ Rate Limit:Access to the API will be limited to a rate of 1 request per second. 
+Please keep that limit in mind when deciding how many IDs to include per request.
++ Response Timeframe:Your application should support a response timeframe for a 
+given request of up to 15 seconds for all individual tweets to be returned.  99+% of 
+tweets will be returned in less than 1 second, but for various reasons a very small 
+percentage may take longer.
++ Response Order:Individual tweets will be returned in an unordered/first-available 
+list. It is important that your application allow for tweets to be processed in the 
+order in which they are returned;they will not necessarily be in the order in which 
+they were requested.
 
 
 More Details
