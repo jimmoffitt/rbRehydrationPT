@@ -15,21 +15,21 @@ configured to write activities to a local database.  There is a PtDatabase class
 the database details, including an ActiveRecord schema description.  If you are using a database, the PowerTrack
 configuration file must have a "database" section containing connection details.  
 
-Requests for tweets can produce three results:
+Requests for tweets can produce four results:
 + Tweet is available through API.
 + Tweet is older than what can be provided by Rehydration API.  30-days old is the anticipated limit.
 + Tweet could not be found and is not available (na).
++ Tweet ID format is invalid.  IDs must be numeric and have no more than 18 digits.
 
 Tweets that could not be retrieved can be handled in a flexible fashion.
 + Unavailable Tweets IDs are written to a list which is writtento an output file.
 + Also, for unavailable IDs, a file can be written in a subfolder with the API status written in it.
-            
      + @out_box/@out_box_na/[tweet_id].na
      + @out_box/@out_box_out/[tweet_id].old
 
 API responses include 3 key elements:
   1. The tweet ID and associated content (if available)
-  2. Availability (a true/false	Boolean)
+  2. Availability (a true/false Boolean)
   3. Status (only present for unavailable tweets)
 
 
