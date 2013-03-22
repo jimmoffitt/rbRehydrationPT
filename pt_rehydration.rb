@@ -18,10 +18,11 @@ Retrieved tweets are written to a user-specified out_box, with a [tweet_id].json
 There is also an option to have the tweets written to a local (MySQL) database.  (See the PtDB class below for
 information on what the expected local schema looks like.)
 
-Requests for tweets can result in three results:
+Requests for tweets can result in four results:
 + Tweet is available through API.
 + Tweet is older than what can be provided by Rehydration API.  30-days old is the anticipated limit.
 + Tweet could not be found and is not available (na).
++ Tweet ID format is invalid.  IDs must be numeric and have no more than 18 digits.
 
 Tweets that could not be retrieved can be handled in a flexible fashion.
 + Tweets IDs are written to an output file.
@@ -87,7 +88,9 @@ Example API responses:
         None available:
         "[{\"id\":\"311232868594622458\",\"status\":\"not found\",\"available\":false},
           {\"id\":\"311232868594622453\",\"status\":\"not found\",\"available\":false},
-          {\"id\":\"311232868594622447\",\"status\":\"not found\",\"available\":false}
+          {\"id\":\"311232868594622447\",\"status\":\"not found\",\"available\":false},
+          {\"id\":\"5ghghkhgj646464fhg\",\"status\":\"invalid ID format\",\"available\":false},
+          {\"id\":\"286933899064524800\",\"status\":\"outside available timeframe\",\"available\":false}
         ]\r\n"
 
         Some available, some not:
@@ -113,7 +116,7 @@ class PtRehydration
     require "base64"
     require "fileutils"
 
-    ID_API_REQUEST_LIMIT = 25 #Limit on the number of activity IDs per Rehydration API request.
+    ID_API_REQUEST_LIMIT = 100 #Limit on the number of activity IDs per Rehydration API request.
 
     attr_accessor :http,  #Rehydration object needs a HTTP object to make requests of.
                   :datastore, #Rehydration object can use a database object to store data.
@@ -221,21 +224,25 @@ class PtRehydration
 
             if @keep_na_files then
                 #Write ID.old file.
-                File.open(@out_box_old + "/" + activity["id"] + ".old", "wb") do |new_file|
+                File.open(@out_box_old + "/" + activity["id"] + ".old", "w") do |new_file|
                     new_file.write(activity["id"] + " => " + activity["status"])
                 end
             end
-        elsif activity["status"].include?("not found") then
+        elsif activity["status"].include?("not found") or activity["status"].include?("invalid ID") then
             #Add to list of not available activities.
             @id_na_list << activity["id"]
 
             if @keep_na_files then
                 #Write ID.na file.
-                File.open(@out_box_na + "/" + activity["id"] + ".na", "wb") do |new_file|
+                File.open(@out_box_na + "/" + activity["id"] + ".na", "w") do |new_file|
                     new_file.write(activity["id"] + " => " + activity["status"])
                 end
             end
         end
+
+
+
+
     end
 
     '''
@@ -289,7 +296,7 @@ class PtRehydration
 
         #Write list to file.
         attribute = "out_box_" + not_found_type
-        File.open(self.send(attribute.to_sym) + "/" + filename + ".dat", "wb") do |new_file|
+        File.open(self.send(attribute.to_sym) + "/" + filename + ".dat", "a") do |new_file|
             new_file.write(not_found_array.to_json)
         end
     end
@@ -735,7 +742,7 @@ if __FILE__ == $0  #This script code is executed when running this file.
     end
 
     if $config.nil? then
-        $config = "./PowerTrackConfig.yaml"  #Default
+        $config = "./PowerTrackConfig_private.yaml"  #Default
     end
 
     #Create a Rehyrdation PowerTrack object, passing in an account configuration file.
