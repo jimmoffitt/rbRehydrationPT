@@ -22,7 +22,16 @@ Requests for tweets can produce four results:
 + Tweet ID format is invalid.  IDs must be numeric and have no more than 18 digits.
 
 Tweets that could not be retrieved can be handled in a flexible fashion.
-+ Unavailable Tweets IDs are written to a list which is writtento an output file.
++ Unavailable Tweets IDs are added to an array, and that array is appended to a file at the end of the script.
+     + Tweet IDs that are not available and invalid IDs are written to a "ids_na.dat" file in the folder specified 
+	by the "out_box_na" configuration setting.	
+     + Tweets that are too old are written to a "ids_old.dat" file in the folder specified 
+	by the "out_box_old" configuration setting.
+
+	Note: these files containing lists of unavailable tweet IDs are appended to, so it is a best practice to consume/delete 
+	them.  Another option is to rewrite the file each time (File.open with a "w" instead of "a"), but that depends on your
+	particular use-case.
+
 + Also, for unavailable IDs, a file can be written in a subfolder with the API status written in it.
      + @out_box/@out_box_na/[tweet_id].na
      + @out_box/@out_box_out/[tweet_id].old
