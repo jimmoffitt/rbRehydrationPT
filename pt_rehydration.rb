@@ -389,7 +389,9 @@ class PtREST
 
     def password_encoded=(value)
         @password_encoded=value
-        @password = Base64.decode64(@password_encoded)
+        if not @password_encoded.nil? then
+            @password = Base64.decode64(@password_encoded)
+        end
     end
 
     #Helper function for building URsL.
@@ -440,12 +442,20 @@ class PtREST
         return response
     end
 
-    def GET
+    def GET(params=nil)
         uri = URI(@url)
+
+        #params are passed in as a hash.
+        #Example: params["max"] = 100, params["since_date"] = 20130321000000
+        if not params.nil?
+            uri.query = URI.encode_www_form(params)
+        end
+
         http = Net::HTTP.new(uri.host, uri.port)
         http.use_ssl = true
-        request = Net::HTTP::Get.new(uri.path)
+        request = Net::HTTP::Get.new(uri.request_uri)
         request.basic_auth(@user_name, @password)
+
         response = http.request(request)
         return response
     end
