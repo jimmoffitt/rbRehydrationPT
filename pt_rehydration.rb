@@ -281,6 +281,8 @@ class PtRehydration
             ids = contents.split(",")
         elsif contents.include?("\t") then #We have a TAB-delimited file.
             ids = contents.split("\t")
+        elsif contents.include?(" ") then #We have a TAB-delimited file.
+            ids = contents.split(" ")
         else
             contents.gsub!(/\s+/,"")
             ids = contents.split(/\D/)  #The catch all, will split on any non-digit character (space, | whatever)
