@@ -116,7 +116,7 @@ class PtRehydration
     require "base64"
     require "fileutils"
 
-    ID_API_REQUEST_LIMIT = 100 #Limit on the number of activity IDs per Rehydration API request.
+    ID_API_REQUEST_LIMIT = 25 #Limit on the number of activity IDs per Rehydration API request.
 
     attr_accessor :http,  #Rehydration object needs a HTTP object to make requests of.
                   :datastore, #Rehydration object can use a database object to store data.
@@ -281,6 +281,8 @@ class PtRehydration
             ids = contents.split(",")
         elsif contents.include?("\t") then #We have a TAB-delimited file.
             ids = contents.split("\t")
+        elsif contents.include?("\n") then #We have a new-line-delimited file.
+            ids = contents.split("\n")
         elsif contents.include?(" ") then #We have a TAB-delimited file.
             ids = contents.split(" ")
         else
