@@ -749,6 +749,7 @@ end #PtDB class.
 
 #=======================================================================================================================
 if __FILE__ == $0  #This script code is executed when running this file.
+    require 'optparse'
 
     OptionParser.new do |o|
         o.on('-c CONFIG') { |config| $config = config}
