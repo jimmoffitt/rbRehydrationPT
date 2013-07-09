@@ -298,7 +298,7 @@ class PtRehydration
 
         filename = "ids_" + not_found_type
 
-        #Write list to file.
+        #Write list to file.  This appends!
         attribute = "out_box_" + not_found_type
         File.open(self.send(attribute.to_sym) + "/" + filename + ".dat", "a") do |new_file|
             new_file.write(not_found_array.to_json)
@@ -333,6 +333,11 @@ class PtRehydration
 
         #Look in inbox and process files found there.
         Dir.foreach(@in_box) do |item|
+
+            #Initialize "not available" lists.
+            @id_na_list = Array.new
+            @id_old_list = Array.new
+
             #Skip directory references.
             next if item == "." or item == ".."   #Skip parent and this directory "file."
             next if File.directory?(@in_box + "/" + item)  #Skip other sub-directories.
@@ -352,8 +357,8 @@ class PtRehydration
             FileUtils.mv(@in_box + "/" + item, @in_box_completed + "/" + item)
 
             #Write the not available and old id list files.
-            writeList("na", @id_na_list)
-            writeList("old", @id_old_list)
+            writeList("na", @id_na_list) if @id_na_list.length > 0
+            writeList("old", @id_old_list) if @id_old_list.length > 0
         end
     end
 end #PtHydration class
@@ -749,8 +754,8 @@ end #PtDB class.
 
 #=======================================================================================================================
 if __FILE__ == $0  #This script code is executed when running this file.
-    require 'optparse'
 
+    require 'optparse'
     OptionParser.new do |o|
         o.on('-c CONFIG') { |config| $config = config}
         o.parse!
